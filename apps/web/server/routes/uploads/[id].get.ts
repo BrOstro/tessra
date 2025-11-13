@@ -1,7 +1,7 @@
 ﻿import {eq, and} from "drizzle-orm";
-import {db} from "~/server/lib/db";
-import {uploads} from "~/db/schema";
-import {useStorage} from "~/server/plugins/drivers";
+import {db} from "../../lib/db";
+import {uploads} from "../../../db/schema";
+import {useStorage} from "../../plugins/02.storage";
 
 export default defineEventHandler(async (event) => {
 	const { id } = event.context.params;

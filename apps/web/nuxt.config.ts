@@ -12,6 +12,10 @@ console.log('Environment check:', {
 	"S3_BUCKET": process.env.S3_BUCKET ?  process.env.S3_BUCKET : '✗ missing',
 	"S3_REGION": process.env.S3_REGION || 'not set',
 	"S3_ENDPOINT": process.env.S3_ENDPOINT || 'not set',
+	"VISIBILITY": process.env.DEFAULT_VISIBILITY || 'not set',
+	OCR_ENABLED: process.env.OCR_ENABLED === 'true' ? '✓ enabled' : '✗ disabled',
+	OCR_LANG: process.env.OCR_LANG || 'not set',
+	REDIS_URL: process.env.REDIS_URL || 'not set',
 });
 
 export default defineNuxtConfig({
@@ -31,6 +35,7 @@ export default defineNuxtConfig({
 	],
 	runtimeConfig: {
 		adminToken: process.env.ADMIN_TOKEN,
+		defaultVisibility: process.env.DEFAULT_VISIBILITY || 'private',
 		// storage config (server-only)
 		storage: {
 			driver: process.env.STORAGE_DRIVER || "local", // local | s3
@@ -44,6 +49,14 @@ export default defineNuxtConfig({
 			s3AccessKey: process.env.S3_ACCESS_KEY || "",
 			s3SecretKey: process.env.S3_SECRET_KEY || "",
 		},
+		ocr: {
+			enabled: process.env.OCR_ENABLED === "true",
+			lang: process.env.OCR_LANG || "eng",
+		},
+		jobs: {
+			concurrency: parseInt(process.env.JOBS_CONCURRENCY || "5"),
+		},
+		redisUrl: process.env.REDIS_URL || "redis://localhost:6379",
 		public: {
 			appName: process.env.APP_NAME || "Tessra"
 		}

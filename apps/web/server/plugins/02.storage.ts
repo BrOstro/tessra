@@ -1,9 +1,8 @@
-﻿// apps/web/server/plugins/drivers.ts
-import { createLocalStorage } from "@tessra/drivers/storage-local";
+﻿import { createLocalStorage } from "@tessra/drivers/storage-local";
 import { createS3Storage } from "@tessra/drivers/storage-s3";
 
 declare global {
-	var __storage: import("@tessra/core/storage").StorageProvider;
+	let __storage: import("@tessra/core/storage").StorageProvider;
 }
 
 export default defineNitroPlugin(() => {
