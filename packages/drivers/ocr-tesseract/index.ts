@@ -25,8 +25,12 @@ export function createTesseractOcr(cfg?: TesseractOcrConfig): OcrProvider {
 				return "";
 			}
 
+			if (!input.buffer) {
+				throw new Error("Buffer is required for OCR processing");
+			}
+
 			const w = await getWorker();
-			const { data } = await w.recognize(input.buffer!);
+			const { data } = await w.recognize(input.buffer);
 			return data.text.replace(/[^a-zA-Z0-9\s.,!?;:'"()\[\]{}\-_=+@#$%&*/\\|<>~`]/g, '');
 		},
 	};

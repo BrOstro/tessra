@@ -1,7 +1,7 @@
 import { registerJobProcessor, startJobWorker } from "../lib/jobs";
 import type { OcrJobData } from "../lib/queue";
-import { useOcr } from "./ocr";
-import { useStorage } from "./storage";
+import { useOcr } from "./01.ocr";
+import { useStorage } from "./02.storage";
 import { db } from "../lib/db";
 import { uploads } from "../../db/schema";
 import { eq } from "drizzle-orm";

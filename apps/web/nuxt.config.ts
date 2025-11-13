@@ -54,7 +54,7 @@ export default defineNuxtConfig({
 			lang: process.env.OCR_LANG || "eng",
 		},
 		jobs: {
-			concurrency: parseInt(process.env.JOBS_CONCURRENCY || 5),
+			concurrency: parseInt(process.env.JOBS_CONCURRENCY || "5"),
 		},
 		redisUrl: process.env.REDIS_URL || "redis://localhost:6379",
 		public: {
