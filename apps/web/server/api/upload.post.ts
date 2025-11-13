@@ -6,7 +6,7 @@ import { useStorage } from "../plugins/02.storage";
 import { enqueueOcrJob } from "../lib/queue";
 
 export default defineEventHandler(async (event) => {
-	requireAdminAuth(event);
+	await requireAdminAuth(event);
 
 	const form = await readMultipartFormData(event);
 	const file = form?.find(f => f.name === 'file' && 'data' in f);
