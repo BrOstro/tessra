@@ -21,7 +21,11 @@ export function createTesseractOcr(cfg?: TesseractOcrConfig): OcrProvider {
 			});
 
 			try {
-				const { data } = await worker.recognize(input.buffer!);
+				if (!input.buffer) {
+					throw new Error("Buffer is required for OCR processing");
+				}
+
+				const { data } = await worker.recognize(input.buffer);
 				// Extract only alphanumeric characters
 				return data.text.replace(/[^a-zA-Z0-9\s]/g, '');
 			} finally {

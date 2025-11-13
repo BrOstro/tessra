@@ -2,7 +2,7 @@
 import { uploads } from "../../db/schema";
 import { db } from "../lib/db";
 import { requireAdminAuth } from "../utils/auth";
-import { useStorage } from "../plugins/drivers";
+import { useStorage } from "../plugins/storage";
 import { enqueueOcrJob } from "../lib/queue";
 
 export default defineEventHandler(async (event) => {

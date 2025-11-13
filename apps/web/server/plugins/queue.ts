@@ -1,7 +1,7 @@
 import { registerJobProcessor, startJobWorker } from "../lib/jobs";
 import type { OcrJobData } from "../lib/queue";
 import { useOcr } from "./ocr";
-import { useStorage } from "./drivers";
+import { useStorage } from "./storage";
 import { db } from "../lib/db";
 import { uploads } from "../../db/schema";
 import { eq } from "drizzle-orm";
@@ -46,5 +46,5 @@ export default defineNitroPlugin(async () => {
 		});
 	}
 
-	await startJobWorker(5); // 5 concurrent jobs
+	await startJobWorker(rc.jobs.concurrency);
 });
