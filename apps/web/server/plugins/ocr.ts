@@ -1,4 +1,4 @@
-import { createTesseractOcr } from "@tessra/drivers/ocr-tesseract";
+import {createTesseractOcr} from "@tessra/drivers/ocr-tesseract";
 
 declare global {
 	let __ocr: import("@tessra/core/ocr").OcrProvider | null;

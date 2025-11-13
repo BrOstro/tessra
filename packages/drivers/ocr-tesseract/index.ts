@@ -26,8 +26,8 @@ export function createTesseractOcr(cfg?: TesseractOcrConfig): OcrProvider {
 				}
 
 				const { data } = await worker.recognize(input.buffer);
-				// Extract only alphanumeric characters
-				return data.text.replace(/[^a-zA-Z0-9\s]/g, '');
+
+				return data.text.replace(/[^\w\s.,@$-]/g, '');
 			} finally {
 				await worker.terminate();
 			}
