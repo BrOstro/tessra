@@ -8,29 +8,26 @@ export interface TesseractOcrConfig {
 
 export function createTesseractOcr(cfg?: TesseractOcrConfig): OcrProvider {
 	const lang = cfg?.lang || "eng";
+	let worker: Awaited<ReturnType<typeof createWorker>> | null = null;
+
+	const getWorker = async () => {
+		if (!worker) {
+			worker = await createWorker(lang, undefined, {
+				logger: cfg?.logger,
+			});
+		}
+		return worker;
+	};
 
 	return {
 		async extractText(input: { key?: string; buffer?: Buffer; mime: string }) {
-			// Only process image files
 			if (!input.mime.startsWith("image/")) {
 				return "";
 			}
 
-			const worker = await createWorker(lang, undefined, {
-				logger: cfg?.logger,
-			});
-
-			try {
-				if (!input.buffer) {
-					throw new Error("Buffer is required for OCR processing");
-				}
-
-				const { data } = await worker.recognize(input.buffer);
-
-				return data.text.replace(/[^\w\s.,@$-]/g, '');
-			} finally {
-				await worker.terminate();
-			}
+			const w = await getWorker();
+			const { data } = await w.recognize(input.buffer!);
+			return data.text.replace(/[^a-zA-Z0-9\s.,!?;:'"()\[\]{}\-_=+@#$%&*/\\|<>~`]/g, '');
 		},
 	};
 }
