@@ -1,0 +1,23 @@
+{
+	"name": "tessra",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"scripts": {
+		"dev": "npm --workspace apps/web run dev",
+		"build": "npm --workspace apps/web run build",
+		"start": "npm --workspace apps/web run start",
+		"db:generate": "npm --workspace apps/web run db:generate",
+		"db:push": "npm --workspace apps/web run db:push",
+		"db:studio": "npm --workspace apps/web run db:studio"
+	},
+	"devDependencies": {
+		"@types/node": "^24.10.1"
+	},
+	"dependencies": {
+		"@aws-sdk/client-s3": "^3.929.0",
+		"@aws-sdk/s3-request-presigner": "^3.929.0"
+	}
+}

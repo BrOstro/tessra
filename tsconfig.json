@@ -1,0 +1,19 @@
+﻿{
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"strict": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"types": ["node"],
+		"baseUrl": ".",
+		"paths": {
+			"@tessra/core/*": ["packages/core/*"],
+			"@tessra/drivers/*": ["packages/drivers/*"]
+		}
+	},
+	"include": ["apps", "packages", "server", "db"]
+}

@@ -1,0 +1,17 @@
+﻿{
+	"name": "@tessra/core",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./index.ts",
+		"./storage": "./storage.ts",
+		"./ocr": "./ocr.ts",
+		"./vision": "./vision.ts",
+		"./search": "./search.ts"
+	},
+	"typesVersions": {
+		"*": {
+			"*": ["./*"]
+		}
+	}
+}

@@ -1,0 +1,5 @@
+﻿/node_modules/
+.nuxt/
+.node_modules/
+.idea/
+.env

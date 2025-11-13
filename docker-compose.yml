@@ -1,0 +1,33 @@
+﻿version: "3.9"
+name: "Tessra"
+services:
+  postgres:
+    image: postgres:17.6
+    container_name: tessra_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tessra
+    ports: [ "5432:5432" ]
+    volumes:
+      - pg:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:8.2.3
+    container_name: tessra_redis
+    ports: [ "6379:6379" ]
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      retries: 5
+
+volumes:
+  pg: {}
+  redis: {}
