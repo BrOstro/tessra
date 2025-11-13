@@ -3,6 +3,7 @@ import { uploads } from "../../db/schema";
 import { db } from "../lib/db";
 import { requireAdminAuth } from "../utils/auth";
 import { useStorage } from "../plugins/drivers";
+import { enqueueOcrJob } from "../lib/queue";
 
 export default defineEventHandler(async (event) => {
 	requireAdminAuth(event);
@@ -38,8 +39,18 @@ export default defineEventHandler(async (event) => {
 
 	const id = inserted[0].id;
 
+	// Enqueue OCR job if enabled and file is an image
+	const rc = useRuntimeConfig();
+	if (rc.ocr.enabled && mime.startsWith('image/')) {
+		await enqueueOcrJob({
+			uploadId: id,
+			objectKey: key,
+			mime
+		});
+	}
+
 	return {
 		id,
-		publicUrl: `${getRequestURL(event).origin}/i/${id}`
+		publicUrl: `${getRequestURL(event).origin}/uploads/${id}`
 	};
 });

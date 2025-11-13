@@ -1,0 +1,7 @@
+{
+	"name": "@tessra/ocr-tesseract",
+	"type": "module",
+	"exports": {
+		".": "./index.ts"
+	}
+}
