@@ -33,7 +33,8 @@ export default defineEventHandler(async (event) => {
 
 	// Special validation for S3 storage driver
 	if (key === 'storage_driver' && value === 's3') {
-		const s3Status = await checkS3Status();
+		const config = useRuntimeConfig();
+		const s3Status = await checkS3Status(config.storage);
 
 		if (!s3Status.configured || !s3Status.connected) {
 			throw createError({

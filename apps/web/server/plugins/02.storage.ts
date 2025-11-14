@@ -19,13 +19,16 @@ export default defineNitroPlugin(() => {
 		publicBase: s.localPublicBase
 	});
 
-	const s3Storage = createS3Storage({
-		endpoint: s.s3Endpoint,
-		region: s.s3Region,
-		bucket: s.s3Bucket,
-		accessKeyId: s.s3AccessKey,
-		secretAccessKey: s.s3SecretKey
-	});
+	const hasS3Config = s.s3Endpoint && s.s3Region && s.s3Bucket && s.s3AccessKey && s.s3SecretKey;
+	const s3Storage = hasS3Config
+		? createS3Storage({
+			endpoint: s.s3Endpoint,
+			region: s.s3Region,
+			bucket: s.s3Bucket,
+			accessKeyId: s.s3AccessKey,
+			secretAccessKey: s.s3SecretKey
+		})
+		: undefined;
 
 	// Attach both storage drivers as global singletons
 	globalThis.__storage = {

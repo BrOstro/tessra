@@ -6,12 +6,20 @@ export interface S3Status {
 	message: string;
 }
 
+export interface S3Config {
+	s3Bucket: string;
+	s3Region: string;
+	s3AccessKey: string;
+	s3SecretKey: string;
+	s3Endpoint?: string;
+}
+
 /**
  * Check if S3 is configured and test the connection
+ * @param storageConfig - Storage configuration from runtime config
  */
-export async function checkS3Status(): Promise<S3Status> {
-	const rc = useRuntimeConfig();
-	const s = rc.storage;
+export async function checkS3Status(storageConfig: S3Config): Promise<S3Status> {
+	const s = storageConfig;
 
 	// Check if required S3 environment variables are configured
 	const hasConfig = !!(

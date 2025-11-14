@@ -73,7 +73,7 @@
 </template>
 
 <script setup lang="ts">
-const toast = useToast()
+const toast = useToast();
 
 // Settings state
 const settings = ref({

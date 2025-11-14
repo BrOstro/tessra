@@ -8,23 +8,28 @@ const SETTINGS_KEY_PREFIX = 'settings:';
 const SETTINGS_CACHE_TTL = 300;
 
 let redisClient: ReturnType<typeof createClient> | null = null;
+let connectionPromise: Promise<ReturnType<typeof createClient>> | null = null;
 
 /**
  * Gets or creates the Redis client for settings caching
+ * Uses a connection promise guard to prevent race conditions from concurrent calls
  */
 async function getRedisClient() {
-	if (!redisClient) {
-		const connectionOptions = getRedisConnectionOptions();
-		redisClient = createClient(connectionOptions);
+	if (!connectionPromise) {
+		connectionPromise = (async () => {
+			const connectionOptions = getRedisConnectionOptions();
+			redisClient = createClient(connectionOptions);
 
-		redisClient.on('error', (err) => {
-			console.error('Redis settings cache client error:', err);
-		});
+			redisClient.on('error', (err) => {
+				console.error('Redis settings cache client error:', err);
+			});
 
-		await redisClient.connect();
+			await redisClient.connect();
+			return redisClient;
+		})();
 	}
 
-	return redisClient;
+	return connectionPromise;
 }
 
 /**
@@ -92,13 +97,30 @@ export async function updateSetting(key: string, value: string): Promise<void> {
 
 /**
  * Clears all settings from cache (useful for manual cache busting)
+ * Uses SCAN instead of KEYS to avoid blocking Redis server
  */
 export async function clearSettingsCache(): Promise<void> {
 	try {
 		const client = await getRedisClient();
-		const keys = await client.keys(SETTINGS_KEY_PREFIX + '*');
-		if (keys.length > 0) {
-			await client.del(keys);
+		let cursor = 0;
+		let deletedCount = 0;
+
+		do {
+			const result = await client.scan(cursor, {
+				MATCH: SETTINGS_KEY_PREFIX + '*',
+				COUNT: 100
+			});
+
+			cursor = result.cursor;
+
+			if (result.keys.length > 0) {
+				await client.del(result.keys);
+				deletedCount += result.keys.length;
+			}
+		} while (cursor !== 0);
+
+		if (deletedCount > 0) {
+			console.log(`Cleared ${deletedCount} settings from cache`);
 		}
 	} catch (error) {
 		console.error('Failed to clear settings cache:', error);
