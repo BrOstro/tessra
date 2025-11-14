@@ -8,5 +8,5 @@ export default defineConfig({
 	dbCredentials: {
 		url: process.env.DATABASE_URL!,
 	},
-	strict: true,
+	strict: process.env.NODE_ENV !== 'production' && !process.env.RAILWAY_ENVIRONMENT_NAME,
 });
