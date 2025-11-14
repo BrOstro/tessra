@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
 
 	const upload = u[0];
 
-	const storage = useStorage();
+	const storage = await useStorage();
 
 	// Fetch the file buffer from storage
 	const buffer = await storage.get(upload.objectKey);
