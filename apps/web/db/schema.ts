@@ -21,3 +21,14 @@ export const uploads = pgTable(
 		expiresAt: timestamp('expires_at', { withTimezone: true }),
 	}
 );
+
+export const sessions = pgTable(
+	'sessions',
+	{
+		id: uuid('id').defaultRandom().primaryKey(),
+		token: text('token').notNull().unique(),
+		createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+		lastActivityAt: timestamp('last_activity_at', { withTimezone: true }).defaultNow().notNull(),
+	}
+);

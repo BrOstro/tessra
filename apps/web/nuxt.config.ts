@@ -26,7 +26,7 @@ export default defineNuxtConfig({
 		'@tessra/core': resolve(currentDir, '../../packages/core'),
 		'@tessra/drivers': resolve(currentDir, '../../packages/drivers'),
 	},
-
+	css: ['~/assets/css/main.css'],
 	modules: [
 		'@nuxt/eslint',
 		'@nuxt/image',
