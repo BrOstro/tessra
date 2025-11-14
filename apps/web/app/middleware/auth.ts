@@ -5,6 +5,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 	// This ensures SSR and page refreshes work correctly
 	await checkAuth();
 
+	// Redirect logic for index
+	if (to.path === '/') {
+		if (isAuthenticated.value) {
+			return navigateTo('/admin');
+		} else {
+			return navigateTo('/login');
+		}
+	}
+
 	// If not authenticated and trying to access admin pages, redirect to login
 	if (!isAuthenticated.value && to.path.startsWith('/admin')) {
 		return navigateTo('/login');

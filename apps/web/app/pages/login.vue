@@ -19,7 +19,7 @@
 						placeholder="Enter your admin key"
 						size="lg"
 						:disabled="isLoading"
-						autocomplete="current-password"
+						autocomplete="one-time-code"
 					/>
 				</UFormField>
 

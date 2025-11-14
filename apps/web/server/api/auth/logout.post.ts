@@ -3,7 +3,7 @@ import { SESSION_COOKIE_OPTIONS } from '../../utils/auth';
 import { requireCsrfToken } from '../../utils/csrf';
 
 export default defineEventHandler(async (event) => {
-	requireCsrfToken(event);
+	await requireCsrfToken(event);
 
 	const clientIp = getRequestIP(event) || 'unknown';
 

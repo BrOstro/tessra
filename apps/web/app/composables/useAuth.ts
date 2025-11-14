@@ -37,6 +37,7 @@ export const useAuth = () => {
 		} catch (error) {
 			isAuthenticated.value = false;
 			hasChecked.value = true;
+			console.error('[Auth] Session check failed:', error);
 		} finally {
 			isLoading.value = false;
 		}
@@ -59,6 +60,7 @@ export const useAuth = () => {
 			hasChecked.value = true;
 			return { success: true };
 		} catch (error: any) {
+			console.error('[Auth] Session check failed:', error);
 			isAuthenticated.value = false;
 			hasChecked.value = true;
 			return {

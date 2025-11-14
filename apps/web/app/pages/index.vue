@@ -8,13 +8,7 @@
 </template>
 
 <script setup lang="ts">
-const { isAuthenticated } = useAuth();
-
 definePageMeta({
   middleware: ['auth'],
-});
-
-onMounted(() => {
-  navigateTo(isAuthenticated.value ? '/admin' : '/login');
 });
 </script>
