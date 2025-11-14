@@ -4,6 +4,7 @@ import { db } from "../lib/db";
 import { requireAdminAuth } from "../utils/auth";
 import { useStorage } from "../plugins/02.storage";
 import { enqueueOcrJob } from "../lib/queue";
+import { getSetting } from "../utils/settings";
 
 export default defineEventHandler(async (event) => {
 	await requireAdminAuth(event);
@@ -14,7 +15,7 @@ export default defineEventHandler(async (event) => {
 		throw createError({ statusCode: 400, statusMessage: 'file required' });
 	}
 
-	const storage = useStorage();
+	const storage = await useStorage();
 	const buffer = file.data as Buffer;
 	const mime = (file as any).type || 'application/octet-stream';
 	const hash = crypto.createHash('sha256').update(buffer).digest('hex');
@@ -24,24 +25,25 @@ export default defineEventHandler(async (event) => {
 	// Store file using the configured storage provider (local or S3)
 	await storage.put({ buffer, key, mime });
 
-	const defaultVisibility = process.env.DEFAULT_VISIBILITY as 'public' | 'private' | undefined;
-	const visibility = defaultVisibility && ['public', 'private'].includes(defaultVisibility)
-		? defaultVisibility
-		: 'private';
+	const rc = useRuntimeConfig();
+	const defaultVisibility = await getSetting(
+		'default_visibility',
+		rc.defaultVisibility
+	) as 'public' | 'private';
 
 	const inserted = await db.insert(uploads).values({
 		objectKey: key,
 		mime,
 		sizeBytes: buffer.length,
 		sha256: hash,
-		visibility
+		visibility: defaultVisibility
 	}).returning();
 
 	const id = inserted[0].id;
 
 	// Enqueue OCR job if enabled and file is an image
-	const rc = useRuntimeConfig();
-	if (rc.ocr.enabled && mime.startsWith('image/')) {
+	const ocrEnabled = (await getSetting('ocr_enabled', rc.ocr.enabled ? 'true' : 'false')) === 'true';
+	if (ocrEnabled && mime.startsWith('image/')) {
 		await enqueueOcrJob({
 			uploadId: id,
 			objectKey: key,

@@ -32,3 +32,12 @@ export const sessions = pgTable(
 		lastActivityAt: timestamp('last_activity_at', { withTimezone: true }).defaultNow().notNull(),
 	}
 );
+
+export const settings = pgTable(
+	'settings',
+	{
+		key: text('key').primaryKey(),
+		value: text('value').notNull(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+	}
+);

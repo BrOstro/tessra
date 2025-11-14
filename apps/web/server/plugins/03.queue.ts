@@ -20,7 +20,7 @@ export default defineNitroPlugin(async () => {
 				throw new Error("OCR provider not initialized");
 			}
 
-			const storage = useStorage();
+			const storage = await useStorage();
 			const buffer = await storage.get(objectKey);
 
 			if (!buffer) {

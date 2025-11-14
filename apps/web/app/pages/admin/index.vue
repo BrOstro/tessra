@@ -70,6 +70,11 @@
 				</UCard>
 			</div>
 
+			<!-- Settings Section -->
+			<div class="mt-8">
+				<AdminSettings />
+			</div>
+
 			<!-- Info Section -->
 			<div class="mt-8">
 				<UCard>
