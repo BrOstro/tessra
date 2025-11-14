@@ -1,7 +1,7 @@
 import { validateSession } from '../../lib/sessions';
+import { SESSION_COOKIE_OPTIONS } from '../../utils/auth';
 
 export default defineEventHandler(async (event) => {
-	// Get the session token from cookie
 	const sessionToken = getCookie(event, 'session_token');
 
 	if (!sessionToken) {
@@ -14,13 +14,8 @@ export default defineEventHandler(async (event) => {
 	const isValid = await validateSession(sessionToken);
 
 	if (!isValid) {
-		// Clear invalid cookie
-		deleteCookie(event, 'session_token', {
-			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production',
-			sameSite: 'lax',
-			path: '/',
-		});
+		const { maxAge, ...cookieOptions } = SESSION_COOKIE_OPTIONS;
+		deleteCookie(event, 'session_token', cookieOptions);
 
 		return {
 			authenticated: false,

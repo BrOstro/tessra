@@ -45,9 +45,14 @@ export const useAuth = () => {
 	const login = async (adminKey: string) => {
 		isLoading.value = true;
 		try {
+			const csrfResponse = await $fetch<{ token: string }>('/api/auth/csrf');
+
 			await $fetch('/api/auth/login', {
 				method: 'POST',
 				body: { adminKey },
+				headers: {
+					'X-CSRF-Token': csrfResponse.token,
+				},
 				credentials: 'include',
 			});
 			isAuthenticated.value = true;
@@ -68,8 +73,13 @@ export const useAuth = () => {
 	const logout = async () => {
 		isLoading.value = true;
 		try {
+			const csrfResponse = await $fetch<{ token: string }>('/api/auth/csrf');
+
 			await $fetch('/api/auth/logout', {
 				method: 'POST',
+				headers: {
+					'X-CSRF-Token': csrfResponse.token,
+				},
 				credentials: 'include',
 			});
 		} catch (error) {

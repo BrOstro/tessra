@@ -8,16 +8,13 @@
 </template>
 
 <script setup lang="ts">
-const router = useRouter();
-const { checkAuth, isAuthenticated } = useAuth();
+const { isAuthenticated } = useAuth();
 
-// Check auth and redirect accordingly
-onMounted(async () => {
-  await checkAuth(true); // Force check to ensure fresh validation
-  if (isAuthenticated.value) {
-    await router.push('/admin');
-  } else {
-    await router.push('/login');
-  }
+definePageMeta({
+  middleware: ['auth'],
+});
+
+onMounted(() => {
+  navigateTo(isAuthenticated.value ? '/admin' : '/login');
 });
 </script>
