@@ -5,7 +5,7 @@ import { getSetting } from "../utils/settings";
 declare global {
 	let __storage: {
 		local: import("@tessra/core/storage").StorageProvider;
-		s3: import("@tessra/core/storage").StorageProvider;
+		s3: import("@tessra/core/storage").StorageProvider | undefined;
 	};
 }
 
@@ -41,5 +41,12 @@ export default defineNitroPlugin(() => {
 export async function useStorage(): Promise<import("@tessra/core/storage").StorageProvider> {
 	const rc = useRuntimeConfig();
 	const driver = await getSetting('storage_driver', rc.storage.driver);
-	return driver === 's3' ? globalThis.__storage.s3 : globalThis.__storage.local;
+	if (driver === 's3') {
+		if (!globalThis.__storage.s3) {
+			throw new Error("S3 storage is not configured. Please check your S3 settings.");
+		}
+		return globalThis.__storage.s3;
+	}
+
+	return globalThis.__storage.local;
 }

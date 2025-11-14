@@ -26,7 +26,10 @@ async function getRedisClient() {
 
 			await redisClient.connect();
 			return redisClient;
-		})();
+		})().catch((err) => {
+			connectionPromise = null;
+			throw err;
+		});
 	}
 
 	return connectionPromise;
