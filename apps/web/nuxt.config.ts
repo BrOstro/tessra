@@ -56,7 +56,7 @@ export default defineNuxtConfig({
 		jobs: {
 			concurrency: parseInt(process.env.JOBS_CONCURRENCY || "5"),
 		},
-		redisUrl: process.env.REDIS_URL || "redis://localhost:6379",
+		redisUrl: process.env.REDIS_URL,
 		public: {
 			appName: process.env.APP_NAME || "Tessra"
 		}
