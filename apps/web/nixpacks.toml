@@ -2,7 +2,7 @@
 # This tells Railway to install Tesseract OCR for image text extraction
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "tesseract"]
+nixPkgs = ["nodejs_24", "tesseract"]
 
 [phases.install]
 cmds = ["npm install"]
