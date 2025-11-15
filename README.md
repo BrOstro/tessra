@@ -47,6 +47,9 @@ The development setup includes:
 - PostgreSQL database on port 5432
 - Redis on port 6379
 - Tessra web application on port 3000
+- **Automatic database schema initialization** on first startup
+
+> **Note**: The web container automatically initializes the database schema using `drizzle-kit push` before starting the application. You don't need to manually run `db:push`.
 
 ## Production Deployment
 
@@ -73,6 +76,7 @@ The deployment script will:
 - ✅ Configure your domain and SSL email
 - ✅ Build and start all services
 - ✅ Set up automatic HTTPS with Caddy
+- ✅ Automatically initialize database schema on first run
 
 ### Manual Production Setup
 
@@ -151,14 +155,23 @@ If you prefer to set up manually, follow these steps:
    docker compose -f docker-compose.prod.yml logs -f caddy
    ```
 
-3. **Initialize database (first time only)**
+3. **Verify deployment**
    ```bash
-   # Wait for services to be healthy (30-60 seconds)
+   # Check service status
    docker compose -f docker-compose.prod.yml ps
    
-   # The database schema is automatically applied on first startup
-   # If needed, you can manually push the schema:
-   docker compose -f docker-compose.prod.yml exec web node -e "require('./server/lib/db').initDb()"
+   # View logs to confirm database initialization
+   docker compose -f docker-compose.prod.yml logs web --tail=50
+   ```
+   
+   You should see output like:
+   ```
+   🔄 Initializing Tessra...
+   ⏳ Waiting for database connection...
+   ✅ Database connection established
+   🔄 Applying database schema...
+   ✅ Database schema ready
+   🚀 Starting Tessra application...
    ```
 
 4. **Access your application**
@@ -438,6 +451,19 @@ Backend Network (isolated)
     ├─ PostgreSQL (5432)
     └─ Redis (6379)
 ```
+
+### Container Startup Flow
+
+The web container includes an automatic database initialization process:
+
+1. **PostgreSQL & Redis** start and become healthy
+2. **Web container** starts and runs entrypoint script:
+   - Waits for database connection (retries every 2 seconds)
+   - Runs `drizzle-kit push` to apply schema migrations
+   - Starts the Nuxt application
+3. **Application** is ready to serve requests
+
+This ensures the database schema is always up-to-date on container start. The process is idempotent, so it's safe to restart containers without data loss.
 
 ### Storage Options
 
