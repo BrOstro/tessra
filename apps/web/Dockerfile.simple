@@ -1,0 +1,41 @@
+# Alternative Dockerfile for environments with network restrictions
+# This version copies a pre-built .output directory
+
+FROM node:20.19.5-alpine
+
+# Create app user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nuxt -u 1001
+
+WORKDIR /app
+
+# Copy the pre-built output directory
+# Build the app first with: npm run build
+COPY --chown=nuxt:nodejs apps/web/.output /app/.output
+
+# Copy schema files and node_modules for database initialization
+COPY --chown=nuxt:nodejs apps/web/db /app/schema/db
+COPY --chown=nuxt:nodejs apps/web/drizzle.config.ts /app/schema/
+COPY --chown=nuxt:nodejs apps/web/drizzle /app/schema/drizzle
+COPY --chown=nuxt:nodejs apps/web/node_modules /app/schema/node_modules
+COPY --chown=nuxt:nodejs apps/web/package.json /app/schema/
+
+# Copy entrypoint script
+COPY --chown=nuxt:nodejs apps/web/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Create data directory
+RUN mkdir -p /app/.data && chown -R nuxt:nodejs /app/.data
+
+USER nuxt
+
+EXPOSE 3000
+
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=3000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/admin/ping', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 1
+
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

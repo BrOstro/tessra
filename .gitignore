@@ -1,5 +1,7 @@
-﻿/node_modules/
+/node_modules/
 .nuxt/
 .node_modules/
 .idea/
 .env
+.env.production
+backups/

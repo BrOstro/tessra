@@ -1,5 +1,4 @@
-﻿version: "3.9"
-name: "Tessra"
+﻿name: "Tessra"
 services:
   postgres:
     image: postgres:17.6
@@ -15,6 +14,8 @@ services:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       retries: 5
+    networks:
+      - tessra
 
   redis:
     image: redis:8.2.3
@@ -27,7 +28,45 @@ services:
       test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       retries: 5
+    networks:
+      - tessra
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.simple
+    container_name: tessra_web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/tessra
+      - REDIS_URL=redis://redis:6379
+      - NUXT_REDIS_URL=redis://redis:6379
+      - ADMIN_TOKEN=change-me-please-32chars
+      - STORAGE_DRIVER=local
+      - LOCAL_ROOT=/app/.data
+      - LOCAL_PUBLIC_BASE=http://localhost:3000/raw/
+      - DEFAULT_VISIBILITY=private
+      - OCR_ENABLED=false
+      - JOBS_CONCURRENCY=5
+      - APP_NAME=Tessra
+    volumes:
+      - uploads:/app/.data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - tessra
+    restart: unless-stopped
+
+networks:
+  tessra:
+    driver: bridge
 
 volumes:
   pg: {}
   redis: {}
+  uploads: {}
