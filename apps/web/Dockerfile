@@ -1,68 +1,56 @@
-# Multi-stage Dockerfile for Tessra Nuxt Application
-# Optimized for production with minimal image size
+# Tessra Dockerfile
+# Note: For optimal builds, run `npm run build` before building this image
 
-# Build stage
+# Multi-stage build approach
 FROM node:20.19.5-alpine AS builder
 
-# Install build dependencies
-RUN apk add --no-cache python3 make g++
+WORKDIR /build
 
-# Set working directory
-WORKDIR /app
-
-# Copy workspace configuration
+# Copy package files
 COPY package*.json ./
 COPY tsconfig.json ./
-
-# Copy workspace packages
 COPY packages/ ./packages/
+COPY apps/web/package*.json ./apps/web/
+COPY apps/web/tsconfig.json ./apps/web/
+COPY apps/web/nuxt.config.ts ./apps/web/
+COPY apps/web/drizzle.config.ts ./apps/web/
+COPY apps/web/eslint.config.mjs ./apps/web/
+COPY apps/web/app/ ./apps/web/app/
+COPY apps/web/server/ ./apps/web/server/
+COPY apps/web/db/ ./apps/web/db/
+COPY apps/web/public/ ./apps/web/public/
 
-# Copy web app
-COPY apps/web/ ./apps/web/
+# Install dependencies and build
+RUN npm ci --workspace apps/web --include-workspace-root || \
+    npm install --workspace apps/web --include-workspace-root
 
-# Install dependencies (including devDependencies for build)
-RUN npm ci
-
-# Build the application
-WORKDIR /app/apps/web
+WORKDIR /build/apps/web
 RUN npm run build
 
 # Production stage
-FROM node:20.19.5-alpine AS runner
+FROM node:20.19.5-alpine
 
-# Install dumb-init for proper signal handling
-RUN apk add --no-cache dumb-init
-
-# Create non-root user
+# Create app user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nuxt -u 1001
 
-# Set working directory
 WORKDIR /app
 
-# Copy built application from builder
-COPY --from=builder --chown=nuxt:nodejs /app/apps/web/.output /app/.output
+# Copy the built output
+COPY --from=builder --chown=nuxt:nodejs /build/apps/web/.output /app/.output
 
-# Create data directory for local storage
+# Create data directory
 RUN mkdir -p /app/.data && chown -R nuxt:nodejs /app/.data
 
-# Switch to non-root user
 USER nuxt
 
-# Expose port
 EXPOSE 3000
 
-# Set environment variables
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/admin/ping', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 1
 
-# Use dumb-init to handle signals properly
-ENTRYPOINT ["dumb-init", "--"]
-
-# Start the application
 CMD ["node", ".output/server/index.mjs"]

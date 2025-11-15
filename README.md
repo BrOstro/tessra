@@ -44,6 +44,34 @@ The development setup includes:
 
 ## Production Deployment
 
+### Quick Production Setup (Recommended)
+
+We provide a helper script that automates the deployment process:
+
+```bash
+# 1. Check requirements
+./deploy.sh check
+
+# 2. Interactive setup (creates .env.production with secure passwords)
+./deploy.sh setup
+
+# 3. Deploy
+./deploy.sh deploy
+
+# 4. Check status
+./deploy.sh status
+```
+
+The deployment script will:
+- ✅ Generate secure random passwords automatically
+- ✅ Configure your domain and SSL email
+- ✅ Build and start all services
+- ✅ Set up automatic HTTPS with Caddy
+
+### Manual Production Setup
+
+If you prefer to set up manually, follow these steps:
+
 ### Step 1: Server Requirements
 
 - Linux server (Ubuntu 22.04+ recommended)
@@ -187,6 +215,30 @@ The development setup includes:
 - `JOBS_CONCURRENCY` - Number of concurrent background jobs (default: 5)
 
 ## Management Commands
+
+### Using the Deployment Script
+
+```bash
+# Show status
+./deploy.sh status
+
+# View logs
+./deploy.sh logs
+
+# Backup data
+./deploy.sh backup
+
+# Restart services
+./deploy.sh restart
+
+# Stop services
+./deploy.sh stop
+
+# Generate new passwords
+./deploy.sh generate
+```
+
+### Manual Commands
 
 ### Update the Application
 
@@ -420,14 +472,39 @@ tessra/
 │       ├── app/          # Frontend (Vue components, pages)
 │       ├── server/       # Backend (API routes, server utilities)
 │       ├── db/           # Database schema
-│       └── Dockerfile    # Application container
+│       ├── Dockerfile    # Multi-stage build (requires network access)
+│       └── Dockerfile.simple  # Simple build (uses pre-built output)
 ├── packages/
 │   ├── core/            # Core abstractions (storage, OCR)
 │   └── drivers/         # Provider implementations
 ├── docker-compose.yml            # Development configuration
 ├── docker-compose.prod.yml       # Production configuration
 ├── Caddyfile                     # Reverse proxy configuration
+├── deploy.sh                     # Deployment helper script
 └── .env.production.example       # Production environment template
+```
+
+### Docker Build Notes
+
+The repository includes two Dockerfile options:
+
+1. **`Dockerfile`** (default) - Multi-stage build that compiles the application inside Docker
+   - Requires network access to download npm packages
+   - Best for CI/CD pipelines and production builds
+   - Self-contained and reproducible
+
+2. **`Dockerfile.simple`** - Lightweight build using pre-built output
+   - Requires running `npm run build` locally first
+   - Useful for restricted networks or faster iterations
+   - Smaller build context
+
+To use the simple Dockerfile:
+```bash
+# Build locally first
+npm run build
+
+# Build Docker image
+docker build -f apps/web/Dockerfile.simple -t tessra-web .
 ```
 
 ## License
