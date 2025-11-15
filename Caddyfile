@@ -1,0 +1,109 @@
+# Caddyfile for Tessra Production Deployment
+# Automatic HTTPS with Let's Encrypt
+
+{
+    # Global options
+    email {$ADMIN_EMAIL}
+    
+    # Enable admin API for health checks
+    admin 0.0.0.0:2019
+    
+    # Security headers
+    servers {
+        protocols h1 h2 h3
+    }
+}
+
+# Main site configuration
+{$DOMAIN} {
+    # Enable automatic HTTPS via Let's Encrypt
+    # Caddy will automatically obtain and renew certificates
+    
+    # Security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        
+        # Prevent MIME type sniffing
+        X-Content-Type-Options "nosniff"
+        
+        # Enable XSS protection
+        X-Frame-Options "SAMEORIGIN"
+        
+        # Control referrer information
+        Referrer-Policy "strict-origin-when-cross-origin"
+        
+        # Content Security Policy
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self';"
+        
+        # Remove server identification
+        -Server
+    }
+    
+    # Enable gzip compression
+    encode gzip zstd
+    
+    # Logging
+    log {
+        output file /data/logs/access.log {
+            roll_size 100mb
+            roll_keep 10
+            roll_keep_for 720h
+        }
+        format json
+        level INFO
+    }
+    
+    # Rate limiting to prevent abuse
+    rate_limit {
+        zone dynamic {
+            key {remote_host}
+            events 100
+            window 1m
+        }
+    }
+    
+    # Proxy to Nuxt application
+    reverse_proxy web:3000 {
+        # Health check
+        health_uri /api/admin/ping
+        health_interval 10s
+        health_timeout 5s
+        
+        # Load balancing (for future scaling)
+        lb_policy least_conn
+        
+        # Preserve original request information
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host {host}
+        
+        # Connection settings
+        flush_interval -1
+        
+        # Timeouts
+        transport http {
+            read_timeout 60s
+            write_timeout 60s
+        }
+    }
+    
+    # Custom error pages (optional)
+    handle_errors {
+        @5xx expression `{http.error.status_code} >= 500 && {http.error.status_code} < 600`
+        handle @5xx {
+            respond "Service temporarily unavailable" 503
+        }
+        
+        @4xx expression `{http.error.status_code} >= 400 && {http.error.status_code} < 500`
+        handle @4xx {
+            respond "Not found or unauthorized" {http.error.status_code}
+        }
+    }
+}
+
+# Optional: Redirect www to non-www (uncomment if needed)
+# www.{$DOMAIN} {
+#     redir https://{$DOMAIN}{uri} permanent
+# }
