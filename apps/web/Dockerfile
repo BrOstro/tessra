@@ -39,6 +39,18 @@ WORKDIR /app
 # Copy the built output
 COPY --from=builder --chown=nuxt:nodejs /build/apps/web/.output /app/.output
 
+# Copy schema files for database initialization
+COPY --from=builder --chown=nuxt:nodejs /build/apps/web/db /app/schema/db
+COPY --from=builder --chown=nuxt:nodejs /build/apps/web/drizzle.config.ts /app/schema/
+COPY --from=builder --chown=nuxt:nodejs /build/apps/web/drizzle /app/schema/drizzle
+
+# Copy entrypoint script
+COPY --chown=nuxt:nodejs apps/web/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Install drizzle-kit and tsx for schema migrations
+RUN npm install -g drizzle-kit@0.31.6 tsx@4.20.6 pg@8.16.3
+
 # Create data directory
 RUN mkdir -p /app/.data && chown -R nuxt:nodejs /app/.data
 
@@ -53,4 +65,4 @@ ENV NODE_ENV=production \
 HEALTHCHECK --interval=30s --timeout=3s --start-period=30s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/admin/ping', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 1
 
-CMD ["node", ".output/server/index.mjs"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
