@@ -28,12 +28,18 @@ A powerful, self-hosted image management and OCR processing platform built with 
    cd tessra
    ```
 
-2. **Start the development environment**
+2. **Build the application** (required before Docker)
+   ```bash
+   npm install
+   npm run build
+   ```
+
+3. **Start the development environment**
    ```bash
    docker compose up -d
    ```
 
-3. **Access the application**
+4. **Access the application**
    - Open http://localhost:3000
    - Default admin token: `change-me-please-32chars`
 
@@ -124,7 +130,13 @@ If you prefer to set up manually, follow these steps:
 
 ### Step 3: Deploy
 
-1. **Start the production stack**
+1. **Build the application**
+   ```bash
+   npm install
+   npm run build
+   ```
+
+2. **Start the production stack**
    ```bash
    docker compose --env-file .env.production -f docker-compose.prod.yml up -d
    ```

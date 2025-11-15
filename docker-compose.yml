@@ -34,7 +34,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/Dockerfile.simple
     container_name: tessra_web
     ports:
       - "3000:3000"
@@ -42,6 +42,7 @@ services:
       - NODE_ENV=development
       - DATABASE_URL=postgres://postgres:postgres@postgres:5432/tessra
       - REDIS_URL=redis://redis:6379
+      - NUXT_REDIS_URL=redis://redis:6379
       - ADMIN_TOKEN=change-me-please-32chars
       - STORAGE_DRIVER=local
       - LOCAL_ROOT=/app/.data

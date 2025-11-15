@@ -122,6 +122,10 @@ function deploy_production() {
     fi
     
     print_info "Building application..."
+    npm install
+    npm run build
+    
+    print_info "Building Docker images..."
     docker compose --env-file .env.production -f docker-compose.prod.yml build --no-cache
     
     print_info "Starting services..."
